@@ -6,6 +6,7 @@ use App\Repository\PoubellesRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=PoubellesRepository::class)
@@ -16,16 +17,19 @@ class Poubelles
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups({"horaires"})
      */
     private $id;
 
     /**
      * @ORM\ManyToOne(targetEntity=Contenu::class, inversedBy="poubelles")
+     * @Groups("horaires")
      */
     private $contenue;
 
     /**
      * @ORM\ManyToOne(targetEntity=Couleurs::class, inversedBy="poubelles")
+     * @Groups("horaires")
      */
     private $couleur;
 
@@ -35,6 +39,7 @@ class Poubelles
     private $ville;
 
     /**
+     * @Groups("fgd")
      * @ORM\OneToMany(targetEntity=Horaires::class, mappedBy="poubelles")
      */
     private $horaires;

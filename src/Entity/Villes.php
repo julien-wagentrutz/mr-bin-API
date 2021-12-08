@@ -5,7 +5,9 @@ namespace App\Entity;
 use App\Repository\VillesRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Ignore;
 
 /**
  * @ORM\Entity(repositoryClass=VillesRepository::class)
@@ -16,16 +18,19 @@ class Villes
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups("horaires")
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=5)
+     * @Groups("horaires")
      */
     private $cp;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups("horaires")
      */
     private $label;
 
@@ -44,7 +49,14 @@ class Villes
         return $this->id;
     }
 
-    public function getCp(): ?string
+	public function setId($id): self
+	{
+		$this->id = $id;
+		return $this;
+	}
+
+
+	public function getCp(): ?string
     {
         return $this->cp;
     }

@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\CouleursRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -16,23 +17,26 @@ class Couleurs
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups("horaires")
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups("horaires")
      */
     private $label;
-
-    /**
-     * @ORM\Column(type="string", length=7)
-     */
-    private $hexa;
 
     /**
      * @ORM\OneToMany(targetEntity=Poubelles::class, mappedBy="couleur")
      */
     private $poubelles;
+
+    /**
+     * @ORM\Column(type="string", length=100)
+     * @Groups("horaires")
+     */
+    private $class;
 
     public function __construct()
     {
@@ -56,17 +60,7 @@ class Couleurs
         return $this;
     }
 
-    public function getHexa(): ?string
-    {
-        return $this->hexa;
-    }
 
-    public function setHexa(string $hexa): self
-    {
-        $this->hexa = $hexa;
-
-        return $this;
-    }
 
     /**
      * @return Collection|Poubelles[]
@@ -94,6 +88,18 @@ class Couleurs
                 $poubelle->setCouleur(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getClass(): ?string
+    {
+        return $this->class;
+    }
+
+    public function setClass(string $class): self
+    {
+        $this->class = $class;
 
         return $this;
     }

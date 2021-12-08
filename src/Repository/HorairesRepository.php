@@ -22,19 +22,21 @@ class HorairesRepository extends ServiceEntityRepository
     // /**
     //  * @return Horaires[] Returns an array of Horaires objects
     //  */
-    /*
-    public function findByExampleField($value)
+
+    public function findByVille($cp)
     {
         return $this->createQueryBuilder('h')
-            ->andWhere('h.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('h.id', 'ASC')
+	        ->innerJoin('h.poubelles', 'p' )
+	        ->innerJoin('p.ville', 'v' )
+            ->andWhere('v.cp = :val')
+            ->setParameter('val', $cp)
+            ->orderBy('h.passage ', 'ASC')
             ->setMaxResults(10)
             ->getQuery()
             ->getResult()
         ;
     }
-    */
+
 
     /*
     public function findOneBySomeField($value): ?Horaires

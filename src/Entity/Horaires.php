@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Repository\HorairesRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\Ignore;
 
 /**
  * @ORM\Entity(repositoryClass=HorairesRepository::class)
@@ -14,24 +16,22 @@ class Horaires
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups("horaires")
      */
     private $id;
 
     /**
      * @ORM\ManyToOne(targetEntity=Poubelles::class, inversedBy="horaires")
+     * @Groups("horaires")
      */
     private $poubelles;
 
-
     /**
-     * @ORM\Column(type="time", nullable=true)
+     * @ORM\Column(type="datetime")
+     * @Groups("horaires")
      */
-    private $heure;
+    private $passage;
 
-    /**
-     * @ORM\Column(type="date")
-     */
-    private $jour;
 
     public function getId(): ?int
     {
@@ -50,27 +50,16 @@ class Horaires
         return $this;
     }
 
-    public function getHeure(): ?\DateTimeInterface
+    public function getPassage(): ?\DateTimeInterface
     {
-        return $this->heure;
+        return $this->passage;
     }
 
-    public function setHeure(?\DateTimeInterface $heure): self
+    public function setPassage(\DateTimeInterface $passage): self
     {
-        $this->heure = $heure;
+        $this->passage = $passage;
 
         return $this;
     }
 
-    public function getJour(): ?\DateTimeInterface
-    {
-        return $this->jour;
-    }
-
-    public function setJour(\DateTimeInterface $jour): self
-    {
-        $this->jour = $jour;
-
-        return $this;
-    }
 }

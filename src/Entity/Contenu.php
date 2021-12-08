@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\ContenuRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -16,16 +17,19 @@ class Contenu
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups("horaires")
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups("horaires")
      */
     private $label;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups("horaires")
      */
     private $icon;
 
