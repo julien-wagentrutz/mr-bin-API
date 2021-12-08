@@ -34,9 +34,10 @@ class Contenu
     private $icon;
 
     /**
-     * @ORM\OneToMany(targetEntity=Poubelles::class, mappedBy="contenue")
+     * @ORM\ManyToMany(targetEntity=Poubelles::class, mappedBy="contenues")
      */
     private $poubelles;
+
 
     public function __construct()
     {
@@ -84,7 +85,7 @@ class Contenu
     {
         if (!$this->poubelles->contains($poubelle)) {
             $this->poubelles[] = $poubelle;
-            $poubelle->setContenue($this);
+            $poubelle->addContenue($this);
         }
 
         return $this;
@@ -93,10 +94,7 @@ class Contenu
     public function removePoubelle(Poubelles $poubelle): self
     {
         if ($this->poubelles->removeElement($poubelle)) {
-            // set the owning side to null (unless already changed)
-            if ($poubelle->getContenue() === $this) {
-                $poubelle->setContenue(null);
-            }
+            $poubelle->removeContenue($this);
         }
 
         return $this;

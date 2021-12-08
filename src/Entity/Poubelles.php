@@ -21,11 +21,6 @@ class Poubelles
      */
     private $id;
 
-    /**
-     * @ORM\ManyToOne(targetEntity=Contenu::class, inversedBy="poubelles")
-     * @Groups("horaires")
-     */
-    private $contenue;
 
     /**
      * @ORM\ManyToOne(targetEntity=Couleurs::class, inversedBy="poubelles")
@@ -39,14 +34,20 @@ class Poubelles
     private $ville;
 
     /**
-     * @Groups("fgd")
      * @ORM\OneToMany(targetEntity=Horaires::class, mappedBy="poubelles")
      */
     private $horaires;
 
+    /**
+     * @ORM\ManyToMany(targetEntity=Contenu::class, inversedBy="poubelles")
+     * @Groups("horaires")
+     */
+    private $contenues;
+
     public function __construct()
     {
         $this->horaires = new ArrayCollection();
+        $this->contenues = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -54,17 +55,6 @@ class Poubelles
         return $this->id;
     }
 
-    public function getContenue(): ?Contenu
-    {
-        return $this->contenue;
-    }
-
-    public function setContenue(?Contenu $contenue): self
-    {
-        $this->contenue = $contenue;
-
-        return $this;
-    }
 
     public function getCouleur(): ?Couleurs
     {
@@ -116,6 +106,30 @@ class Poubelles
                 $horaire->setPoubelles(null);
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Contenu[]
+     */
+    public function getContenues(): Collection
+    {
+        return $this->contenues;
+    }
+
+    public function addContenue(Contenu $contenue): self
+    {
+        if (!$this->contenues->contains($contenue)) {
+            $this->contenues[] = $contenue;
+        }
+
+        return $this;
+    }
+
+    public function removeContenue(Contenu $contenue): self
+    {
+        $this->contenues->removeElement($contenue);
 
         return $this;
     }
