@@ -3,6 +3,8 @@
 namespace App\Controller;
 
 use App\Entity\Horaires;
+use App\Entity\Poubelles;
+use App\Entity\Produit;
 use App\Entity\Villes;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -55,5 +57,54 @@ class DefaultController extends AbstractController
 		$data = $serializer->normalize($horaires, 'json',['groups' => 'horaires']);
 
 		return new JsonResponse($data);
+	}
+
+	public function scan(string $cb, string $cp,ManagerRegistry $doctrine): Response
+	{
+		//Get product by codebarre
+		$repositoryProduit = $doctrine->getRepository(Produit::class);
+		$produit = $repositoryProduit->findBy(["codeBarre" => $cb]);
+
+		//Get City by CP
+		$repositoryVille = $doctrine->getRepository(Villes::class);
+		$ville = $repositoryVille->findBy(["cp" => $cp]);
+
+		$poubelles = [];
+		$produit[0]->createPoubelles();
+
+		foreach ($produit[0]->getCompositions() as $composant )
+		{
+			$find = false;
+			for($i=0; $i< sizeof($ville[0]->getPoubelles()) && !$find ; $i++)
+			{
+				for($j=0; $j < sizeof($ville[0]->getPoubelles()[$i]->getContenues()) && !$find;$j++ )
+				{
+					if($ville[0]->getPoubelles()[$i]->getContenues()[$j]->getLabel() == $composant->getMatiere()->getLabel())
+					{
+						if(!$produit[0]->includePoubelle($produit[0]->getPoubelles(),$ville[0]->getPoubelles()[$i]))
+						{
+							$produit[0]->addPoubelles($ville[0]->getPoubelles()[$i]);
+							$ville[0]->getPoubelles()[$i]->createDechets();
+						}
+						$ville[0]->getPoubelles()[$i]->addDechets($composant);
+
+						$find = true;
+					}
+				}
+			}
+		}
+
+
+
+		//Serialize Resultat
+		$classMetadataFactory = new ClassMetadataFactory(new AnnotationLoader(new AnnotationReader()));
+		$encoders = [new XmlEncoder(), new JsonEncoder()];
+
+		$normalizer = new GetSetMethodNormalizer($classMetadataFactory);
+		$serializer = new Serializer([$normalizer,new DateTimeNormalizer()], $encoders);
+
+		$produit = $serializer->normalize($produit, 'json',['groups' => 'produit']);
+
+		return new JsonResponse([$produit]);
 	}
 }

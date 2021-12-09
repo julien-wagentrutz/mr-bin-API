@@ -23,7 +23,7 @@ class Contenu
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups("horaires")
+     * @Groups({"horaires","produit","ville"})
      */
     private $label;
 
@@ -38,10 +38,16 @@ class Contenu
      */
     private $poubelles;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Composition::class, mappedBy="matiere")
+     */
+    private $compositions;
+
 
     public function __construct()
     {
         $this->poubelles = new ArrayCollection();
+        $this->compositions = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -95,6 +101,36 @@ class Contenu
     {
         if ($this->poubelles->removeElement($poubelle)) {
             $poubelle->removeContenue($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Composition[]
+     */
+    public function getCompositions(): Collection
+    {
+        return $this->compositions;
+    }
+
+    public function addComposition(Composition $composition): self
+    {
+        if (!$this->compositions->contains($composition)) {
+            $this->compositions[] = $composition;
+            $composition->setMatiere($this);
+        }
+
+        return $this;
+    }
+
+    public function removeComposition(Composition $composition): self
+    {
+        if ($this->compositions->removeElement($composition)) {
+            // set the owning side to null (unless already changed)
+            if ($composition->getMatiere() === $this) {
+                $composition->setMatiere(null);
+            }
         }
 
         return $this;

@@ -5,3 +5,7 @@ index:
 planning:
     path: /horaires/{cp}
     controller: App\Controller\DefaultController::horaires
+
+scan:
+    path: /produits/{cp}/{cb}
+    controller: App\Controller\DefaultController::scan

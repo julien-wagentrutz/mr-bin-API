@@ -24,7 +24,7 @@ class Poubelles
 
     /**
      * @ORM\ManyToOne(targetEntity=Couleurs::class, inversedBy="poubelles")
-     * @Groups("horaires")
+     * @Groups({"horaires","produit","ville"})
      */
     private $couleur;
 
@@ -38,9 +38,14 @@ class Poubelles
      */
     private $horaires;
 
+	/**
+	 * @Groups({"produit"})
+	 */
+    private $dechets;
+
     /**
      * @ORM\ManyToMany(targetEntity=Contenu::class, inversedBy="poubelles")
-     * @Groups("horaires")
+     * @Groups({"horaires","ville"})
      */
     private $contenues;
 
@@ -55,8 +60,31 @@ class Poubelles
         return $this->id;
     }
 
+	/**
+	 * @return Collection|Horaires[]
+	 */
+	public function getDechets(): Collection
+	{
+		return $this->dechets;
+	}
 
-    public function getCouleur(): ?Couleurs
+	public function addDechets(Composition $composition): self
+	{
+		if (!$this->dechets->contains($composition)) {
+			$this->dechets[] = $composition;
+		}
+
+		return $this;
+	}
+
+	public function createDechets()
+	{
+		$this->dechets = new ArrayCollection();
+	}
+
+
+
+	public function getCouleur(): ?Couleurs
     {
         return $this->couleur;
     }

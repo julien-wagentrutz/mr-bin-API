@@ -24,18 +24,19 @@ class Villes
 
     /**
      * @ORM\Column(type="string", length=5)
-     * @Groups("horaires")
+     * @Groups({"horaires","ville"})
      */
     private $cp;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups("horaires")
+     * @Groups({"horaires","ville"})
      */
     private $label;
 
     /**
      * @ORM\OneToMany(targetEntity=Poubelles::class, mappedBy="ville")
+     * @Groups({"ville"})
      */
     private $poubelles;
 

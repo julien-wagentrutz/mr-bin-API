@@ -17,13 +17,13 @@ class Couleurs
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * @Groups("horaires")
+     * @Groups({"horaires"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups("horaires")
+     * @Groups({"horaires","ville","produit"})
      */
     private $label;
 
@@ -34,7 +34,7 @@ class Couleurs
 
     /**
      * @ORM\Column(type="string", length=100)
-     * @Groups("horaires")
+     * @Groups({"horaires","ville","produit"})
      */
     private $class;
 
