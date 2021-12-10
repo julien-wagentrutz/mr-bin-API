@@ -39,6 +39,12 @@ class Poubelles
     private $horaires;
 
 	/**
+	 * @ORM\Column(type="string", length=50, nullable=true)
+	 * @Groups({"horaires","ville"})
+	 */
+	private $recyclable;
+
+	/**
 	 * @Groups({"produit"})
 	 */
     private $dechets;
@@ -48,6 +54,8 @@ class Poubelles
      * @Groups({"horaires","ville"})
      */
     private $contenues;
+
+
 
     public function __construct()
     {
@@ -64,30 +72,30 @@ class Poubelles
 	 * @return Collection|Horaires[]
 	 */
 	public function getDechets(): Collection
-	{
-		return $this->dechets;
-	}
+         	{
+         		return $this->dechets;
+         	}
 
 	public function addDechets(Composition $composition): self
-	{
-		if (!$this->dechets->contains($composition)) {
-			$this->dechets[] = $composition;
-		}
-
-		return $this;
-	}
+         	{
+         		if (!$this->dechets->contains($composition)) {
+         			$this->dechets[] = $composition;
+         		}
+         
+         		return $this;
+         	}
 
 	public function createDechets()
-	{
-		$this->dechets = new ArrayCollection();
-	}
+         	{
+         		$this->dechets = new ArrayCollection();
+         	}
 
 
 
 	public function getCouleur(): ?Couleurs
-    {
-        return $this->couleur;
-    }
+             {
+                 return $this->couleur;
+             }
 
     public function setCouleur(?Couleurs $couleur): self
     {
@@ -158,6 +166,18 @@ class Poubelles
     public function removeContenue(Contenu $contenue): self
     {
         $this->contenues->removeElement($contenue);
+
+        return $this;
+    }
+
+    public function getRecyclable(): ?string
+    {
+        return $this->recyclable;
+    }
+
+    public function setRecyclable(?string $recyclable): self
+    {
+        $this->recyclable = $recyclable;
 
         return $this;
     }

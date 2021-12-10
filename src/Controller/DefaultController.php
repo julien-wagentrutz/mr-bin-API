@@ -128,8 +128,6 @@ class DefaultController extends AbstractController
 
 			$produit = $serializer->normalize($produit, 'json',['groups' => 'recherche']);
 		}
-		dump($produit);
-
 		return new JsonResponse($produit);
 	}
 }
