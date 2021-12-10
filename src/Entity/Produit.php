@@ -23,19 +23,19 @@ class Produit
 
 	/**
 	 * @ORM\Column(type="string", length=13, nullable=true)
-	 * @Groups({"produit"})
+	 * @Groups({"produit","recherche"})
 	 */
 	private $codeBarre;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
-     * @Groups("produit")
+     * @Groups({"produit","recherche"})
      */
     private $label;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
-     * @Groups("produit")
+     * @Groups({"produit","recherche"})
      */
     private $marque;
 

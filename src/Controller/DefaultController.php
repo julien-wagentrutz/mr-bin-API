@@ -94,8 +94,6 @@ class DefaultController extends AbstractController
 			}
 		}
 
-
-
 		//Serialize Resultat
 		$classMetadataFactory = new ClassMetadataFactory(new AnnotationLoader(new AnnotationReader()));
 		$encoders = [new XmlEncoder(), new JsonEncoder()];
@@ -106,5 +104,32 @@ class DefaultController extends AbstractController
 		$produit = $serializer->normalize($produit, 'json',['groups' => 'produit']);
 
 		return new JsonResponse([$produit]);
+	}
+
+	public function recherche(string $recherche,ManagerRegistry $doctrine): Response
+	{
+		//Get product by marque or name
+		$repositoryProduit = $doctrine->getRepository(Produit::class);
+		$produit = $repositoryProduit->findByBrandOrName("%".$recherche."%");
+
+
+		if(empty($produit))
+		{
+			$produit = null;
+		}
+		else
+		{
+			//Serialize Resultat
+			$classMetadataFactory = new ClassMetadataFactory(new AnnotationLoader(new AnnotationReader()));
+			$encoders = [new XmlEncoder(), new JsonEncoder()];
+
+			$normalizer = new GetSetMethodNormalizer($classMetadataFactory);
+			$serializer = new Serializer([$normalizer,new DateTimeNormalizer()], $encoders);
+
+			$produit = $serializer->normalize($produit, 'json',['groups' => 'recherche']);
+		}
+		dump($produit);
+
+		return new JsonResponse($produit);
 	}
 }

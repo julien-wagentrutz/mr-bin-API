@@ -6,6 +6,11 @@ planning:
     path: /horaires/{cp}
     controller: App\Controller\DefaultController::horaires
 
+recherche:
+    path: /produits/recherche/{recherche}
+    controller: App\Controller\DefaultController::recherche
+
 scan:
     path: /produits/{cp}/{cb}
     controller: App\Controller\DefaultController::scan
+
