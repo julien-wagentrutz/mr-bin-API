@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\Entity\Composition;
+use App\Entity\Contenu;
 use App\Entity\Horaires;
 use App\Entity\Poubelles;
 use App\Entity\Produit;
@@ -20,6 +22,7 @@ use Symfony\Component\Serializer\Serializer;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
 use Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class DefaultController extends AbstractController
 {
@@ -59,8 +62,10 @@ class DefaultController extends AbstractController
 		return new JsonResponse($data);
 	}
 
-	public function scan(string $cb, string $cp,ManagerRegistry $doctrine): Response
+	public function scan(string $cb, string $cp,ManagerRegistry $doctrine,HttpClientInterface $client): Response
 	{
+		$entityManager = $doctrine->getManager();
+
 		//Get product by codebarre
 		$repositoryProduit = $doctrine->getRepository(Produit::class);
 		$produit = $repositoryProduit->findBy(["codeBarre" => $cb]);
@@ -69,10 +74,66 @@ class DefaultController extends AbstractController
 		$repositoryVille = $doctrine->getRepository(Villes::class);
 		$ville = $repositoryVille->findBy(["cp" => $cp]);
 
-		$poubelles = [];
-		$produit[0]->createPoubelles();
+		//Serializer
+		$classMetadataFactory = new ClassMetadataFactory(new AnnotationLoader(new AnnotationReader()));
+		$encoders = [new XmlEncoder(), new JsonEncoder()];
 
-		foreach ($produit[0]->getCompositions() as $composant )
+		$normalizer = new GetSetMethodNormalizer($classMetadataFactory);
+		$serializer = new Serializer([$normalizer,new DateTimeNormalizer()], $encoders);
+
+		if($produit == null)
+		{
+			$produitOFF = $client->request("GET","https://world.openfoodfacts.org/api/v0/product/".$cb.".json");
+			$produitOFF = json_decode($produitOFF->getContent())->product;
+			dump($produitOFF);
+			$produit = new Produit();
+			$produit->setCodeBarre($produitOFF->_id);
+			$produit->setLabel($produitOFF->generic_name_fr);
+			$produit->setMarque($produitOFF->brands_tags[0]);
+			if(property_exists($produitOFF, "packaging_text_fr"))
+			{
+				$packagings = $produitOFF->packaging_text_fr;
+				if($packagings != "")
+				{
+					$explodes = explode("\r\n",$packagings);
+					foreach ($explodes as $explode)
+					{
+						$words = explode(" ", $explode);
+						$repositoryContenu = $doctrine->getRepository(Contenu::class);
+						if(strlen(str_replace($words[3],""," ")) < 2)
+						{
+							$contenu = $repositoryContenu->findOneBy(["label"=> $words[2]]);
+						}
+						else
+						{
+							$contenu = $repositoryContenu->findOneBy(["label"=> $words[3]]);
+
+						}
+						if($contenu == null)
+						{
+							$contenu = new Contenu();
+							$contenu->setLabel($words[3]);
+							$entityManager->persist($contenu);
+						}
+						$composition = new Composition();
+						$composition->setLabel($words[1]);
+						$composition->setMatiere($contenu);
+						$entityManager->persist($composition);
+
+						$produit->addComposition($composition);
+					}
+				}
+			}
+
+		}
+		else
+		{
+			$produit = $produit[0];
+		}
+
+		$produit->createPoubelles();
+
+		foreach ($produit->getCompositions() as $composant )
 		{
 			$find = false;
 			for($i=0; $i< sizeof($ville[0]->getPoubelles()) && !$find ; $i++)
@@ -81,9 +142,9 @@ class DefaultController extends AbstractController
 				{
 					if($ville[0]->getPoubelles()[$i]->getContenues()[$j]->getLabel() == $composant->getMatiere()->getLabel())
 					{
-						if(!$produit[0]->includePoubelle($produit[0]->getPoubelles(),$ville[0]->getPoubelles()[$i]))
+						if(!$produit->includePoubelle($produit->getPoubelles(),$ville[0]->getPoubelles()[$i]))
 						{
-							$produit[0]->addPoubelles($ville[0]->getPoubelles()[$i]);
+							$produit->addPoubelles($ville[0]->getPoubelles()[$i]);
 							$ville[0]->getPoubelles()[$i]->createDechets();
 						}
 						$ville[0]->getPoubelles()[$i]->addDechets($composant);
@@ -93,14 +154,8 @@ class DefaultController extends AbstractController
 				}
 			}
 		}
-
-		//Serialize Resultat
-		$classMetadataFactory = new ClassMetadataFactory(new AnnotationLoader(new AnnotationReader()));
-		$encoders = [new XmlEncoder(), new JsonEncoder()];
-
-		$normalizer = new GetSetMethodNormalizer($classMetadataFactory);
-		$serializer = new Serializer([$normalizer,new DateTimeNormalizer()], $encoders);
-
+		$entityManager->persist($produit);
+		$entityManager->flush();
 		$produit = $serializer->normalize($produit, 'json',['groups' => 'produit']);
 
 		return new JsonResponse([$produit]);
@@ -126,7 +181,7 @@ class DefaultController extends AbstractController
 			$normalizer = new GetSetMethodNormalizer($classMetadataFactory);
 			$serializer = new Serializer([$normalizer,new DateTimeNormalizer()], $encoders);
 
-			$produit = $serializer->normalize($produit, 'json',['groups' => 'recherche']);
+			$produit = $serializer->normalize($produit[0], 'json',['groups' => 'recherche']);
 		}
 		return new JsonResponse($produit);
 	}

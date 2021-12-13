@@ -40,7 +40,7 @@ class Poubelles
 
 	/**
 	 * @ORM\Column(type="string", length=50, nullable=true)
-	 * @Groups({"horaires","ville"})
+	 * @Groups({"horaires","ville", "produit"})
 	 */
 	private $recyclable;
 

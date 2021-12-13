@@ -28,7 +28,7 @@ class Contenu
     private $label;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=true)
      * @Groups("horaires")
      */
     private $icon;
