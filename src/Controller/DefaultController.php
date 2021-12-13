@@ -85,7 +85,6 @@ class DefaultController extends AbstractController
 		{
 			$produitOFF = $client->request("GET","https://world.openfoodfacts.org/api/v0/product/".$cb.".json");
 			$produitOFF = json_decode($produitOFF->getContent())->product;
-			dump($produitOFF);
 			$produit = new Produit();
 			$produit->setCodeBarre($produitOFF->_id);
 			$produit->setLabel($produitOFF->generic_name_fr);
@@ -181,7 +180,7 @@ class DefaultController extends AbstractController
 			$normalizer = new GetSetMethodNormalizer($classMetadataFactory);
 			$serializer = new Serializer([$normalizer,new DateTimeNormalizer()], $encoders);
 
-			$produit = $serializer->normalize($produit[0], 'json',['groups' => 'recherche']);
+			$produit = $serializer->normalize($produit, 'json',['groups' => 'recherche']);
 		}
 		return new JsonResponse($produit);
 	}
