@@ -55,12 +55,18 @@ class Poubelles
      */
     private $contenues;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Notification::class, mappedBy="poubelle")
+     */
+    private $notifications;
+
 
 
     public function __construct()
     {
         $this->horaires = new ArrayCollection();
         $this->contenues = new ArrayCollection();
+        $this->notifications = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -72,30 +78,30 @@ class Poubelles
 	 * @return Collection|Horaires[]
 	 */
 	public function getDechets(): Collection
-         	{
-         		return $this->dechets;
-         	}
+                        	{
+                        		return $this->dechets;
+                        	}
 
 	public function addDechets(Composition $composition): self
-         	{
-         		if (!$this->dechets->contains($composition)) {
-         			$this->dechets[] = $composition;
-         		}
-         
-         		return $this;
-         	}
+                        	{
+                        		if (!$this->dechets->contains($composition)) {
+                        			$this->dechets[] = $composition;
+                        		}
+                        
+                        		return $this;
+                        	}
 
 	public function createDechets()
-         	{
-         		$this->dechets = new ArrayCollection();
-         	}
+                        	{
+                        		$this->dechets = new ArrayCollection();
+                        	}
 
 
 
 	public function getCouleur(): ?Couleurs
-             {
-                 return $this->couleur;
-             }
+                            {
+                                return $this->couleur;
+                            }
 
     public function setCouleur(?Couleurs $couleur): self
     {
@@ -178,6 +184,36 @@ class Poubelles
     public function setRecyclable(?string $recyclable): self
     {
         $this->recyclable = $recyclable;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Notification[]
+     */
+    public function getNotifications(): Collection
+    {
+        return $this->notifications;
+    }
+
+    public function addNotification(Notification $notification): self
+    {
+        if (!$this->notifications->contains($notification)) {
+            $this->notifications[] = $notification;
+            $notification->setPoubelle($this);
+        }
+
+        return $this;
+    }
+
+    public function removeNotification(Notification $notification): self
+    {
+        if ($this->notifications->removeElement($notification)) {
+            // set the owning side to null (unless already changed)
+            if ($notification->getPoubelle() === $this) {
+                $notification->setPoubelle(null);
+            }
+        }
 
         return $this;
     }

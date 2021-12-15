@@ -5,12 +5,16 @@ namespace App\Controller;
 use App\Entity\Composition;
 use App\Entity\Contenu;
 use App\Entity\Horaires;
+use App\Entity\Notification;
 use App\Entity\Poubelles;
 use App\Entity\Produit;
+use App\Entity\User;
 use App\Entity\Villes;
 use Doctrine\Persistence\ManagerRegistry;
+use ExpoSDK\ExpoMessage;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Encoder\XmlEncoder;
@@ -183,5 +187,60 @@ class DefaultController extends AbstractController
 			$produit = $serializer->normalize($produit, 'json',['groups' => 'recherche']);
 		}
 		return new JsonResponse($produit);
+	}
+
+	public function notifications(Request $request,ManagerRegistry $doctrine)
+	{
+//		//Provisoire
+//		$request = Request::create(
+//			'/notifications/settings',
+//			'POST',
+//			[
+//				'token' => 'ExponentPushToken[xxxx-xxxx-xxxx]',
+//				'notifications' => [1, 2],
+//			]
+//		);
+
+		$entityManager = $doctrine->getManager();
+
+
+		$token = $request->request->get('token');
+		$poubelles = $request->request->get('notifications');
+
+		if($token == null)
+		{
+			throw new \Exception("Le token doit être fourni");
+		}
+
+		// Create user or search one
+
+		$repositoryUser = $doctrine->getRepository(User::class);
+		$user = $repositoryUser->findOneBy(["token" => $token]);
+
+		if($user == null)
+		{
+			$user = new User();
+			$user->setToken($token);
+			$entityManager->persist($user);
+		}
+
+
+		$repositoryPoubelle = $doctrine->getRepository(Poubelles::class);
+		foreach ($poubelles as $poubelleNotif)
+		{
+			$poubelle = $repositoryPoubelle->find($poubelleNotif);
+
+			//Create Notification entity with poubelle and user
+
+			$notification = new Notification();
+			$notification->setPoubelle($poubelle);
+			$notification->setUser($user);
+			$notification->setTimeNotif(3600);
+			$entityManager->persist($notification);
+		}
+
+		$entityManager->flush();
+
+		return new JsonResponse();
 	}
 }

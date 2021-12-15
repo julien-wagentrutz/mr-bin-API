@@ -2,6 +2,10 @@ index:
     path: /
     controller: App\Controller\DefaultController::index
 
+notification:
+    path: /notifications/settings
+    controller: App\Controller\DefaultController::notifications
+
 planning:
     path: /horaires/{cp}
     controller: App\Controller\DefaultController::horaires
