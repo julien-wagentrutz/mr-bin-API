@@ -60,6 +60,12 @@ class Poubelles
      */
     private $notifications;
 
+    /**
+     * @ORM\Column(type="text", nullable=true)
+     * @Groups({"horaires","ville", "produit"})
+     */
+    private $description;
+
 
 
     public function __construct()
@@ -78,30 +84,30 @@ class Poubelles
 	 * @return Collection|Horaires[]
 	 */
 	public function getDechets(): Collection
-                        	{
-                        		return $this->dechets;
-                        	}
+                                 	{
+                                 		return $this->dechets;
+                                 	}
 
 	public function addDechets(Composition $composition): self
-                        	{
-                        		if (!$this->dechets->contains($composition)) {
-                        			$this->dechets[] = $composition;
-                        		}
-                        
-                        		return $this;
-                        	}
+                                 	{
+                                 		if (!$this->dechets->contains($composition)) {
+                                 			$this->dechets[] = $composition;
+                                 		}
+                                 
+                                 		return $this;
+                                 	}
 
 	public function createDechets()
-                        	{
-                        		$this->dechets = new ArrayCollection();
-                        	}
+                                 	{
+                                 		$this->dechets = new ArrayCollection();
+                                 	}
 
 
 
 	public function getCouleur(): ?Couleurs
-                            {
-                                return $this->couleur;
-                            }
+                                     {
+                                         return $this->couleur;
+                                     }
 
     public function setCouleur(?Couleurs $couleur): self
     {
@@ -214,6 +220,18 @@ class Poubelles
                 $notification->setPoubelle(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): self
+    {
+        $this->description = $description;
 
         return $this;
     }

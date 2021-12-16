@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\NotificationRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=NotificationRepository::class)
@@ -19,16 +20,19 @@ class Notification
 
     /**
      * @ORM\Column(type="integer")
+     * @Groups("user")
      */
     private $timeNotif;
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="notifications")
+     * @Groups("user")
      */
     private $user;
 
     /**
      * @ORM\ManyToOne(targetEntity=Poubelles::class, inversedBy="notifications")
+     * @Groups("user")
      */
     private $poubelle;
 

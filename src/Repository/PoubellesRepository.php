@@ -22,19 +22,23 @@ class PoubellesRepository extends ServiceEntityRepository
     // /**
     //  * @return Poubelles[] Returns an array of Poubelles objects
     //  */
-    /*
-    public function findByExampleField($value)
+
+    public function findByCouleurAndVille($couleur, $ville)
     {
         return $this->createQueryBuilder('p')
-            ->andWhere('p.exampleField = :val')
-            ->setParameter('val', $value)
+	        ->innerJoin('p.couleur', 'c' )
+	        ->innerJoin('p.ville', 'v' )
+            ->andWhere('c.class = :couleur')
+            ->andWhere('v.cp = :ville')
+            ->setParameter('couleur', $couleur)
+            ->setParameter('ville', $ville)
             ->orderBy('p.id', 'ASC')
             ->setMaxResults(10)
             ->getQuery()
             ->getResult()
         ;
     }
-    */
+
 
     /*
     public function findOneBySomeField($value): ?Poubelles

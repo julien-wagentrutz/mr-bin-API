@@ -21,7 +21,6 @@ use Symfony\Component\Serializer\Encoder\XmlEncoder;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Serializer\Normalizer\GetSetMethodNormalizer;
-use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
@@ -191,21 +190,12 @@ class DefaultController extends AbstractController
 
 	public function notifications(Request $request,ManagerRegistry $doctrine)
 	{
-//		//Provisoire
-//		$request = Request::create(
-//			'/notifications/settings',
-//			'POST',
-//			[
-//				'token' => 'ExponentPushToken[xxxx-xxxx-xxxx]',
-//				'notifications' => [1, 2],
-//			]
-//		);
 
 		$entityManager = $doctrine->getManager();
-
-
-		$token = $request->request->get('token');
-		$poubelles = $request->request->get('notifications');
+		$parameters = json_decode($request->getContent(), true);
+		$token = $parameters['token'];
+		$poubelles = $parameters['notifications'];
+		$cp = $parameters['postalCode'];
 
 		if($token == null)
 		{
@@ -213,7 +203,6 @@ class DefaultController extends AbstractController
 		}
 
 		// Create user or search one
-
 		$repositoryUser = $doctrine->getRepository(User::class);
 		$user = $repositoryUser->findOneBy(["token" => $token]);
 
@@ -224,23 +213,33 @@ class DefaultController extends AbstractController
 			$entityManager->persist($user);
 		}
 
+		$repositoryNotifications = $doctrine->getRepository(Notification::class);
+		$notifications = $repositoryNotifications->findBy(['user' => $user->getId()]);
+
+		foreach ($notifications as $notification)
+		{
+			$entityManager->remove($notification);
+		}
 
 		$repositoryPoubelle = $doctrine->getRepository(Poubelles::class);
+
 		foreach ($poubelles as $poubelleNotif)
 		{
-			$poubelle = $repositoryPoubelle->find($poubelleNotif);
-
+			$poubelle = $repositoryPoubelle->findByCouleurAndVille($poubelleNotif,$cp);
 			//Create Notification entity with poubelle and user
+			if($poubelle != null)
+			{
+				$notification = new Notification();
+				$notification->setPoubelle($poubelle[0]);
+				$notification->setUser($user);
+				$notification->setTimeNotif(3600);
+				$entityManager->persist($notification);
+			}
 
-			$notification = new Notification();
-			$notification->setPoubelle($poubelle);
-			$notification->setUser($user);
-			$notification->setTimeNotif(3600);
-			$entityManager->persist($notification);
 		}
 
 		$entityManager->flush();
 
-		return new JsonResponse();
+		return new JsonResponse(true);
 	}
 }
